@@ -1,0 +1,39 @@
+version: '2.1'
+services:
+     elasticsearch:
+       build:
+        context: elasticsearch/
+        args:
+          ELK_VERSION: $ELK_VERSION
+       volumes:
+          - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+       environment:
+          ES_JAVA_OPTS: "-Xms1024m -Xmx1024m"
+       ports:
+          - "5000:5000"
+          - "9600:9600"
+          - "9200:9200"
+       networks:
+           docker-efk:
+
+     kibana:
+       build:
+        context: kibana/
+        args:
+          ELK_VERSION: $ELK_VERSION
+       ports:
+          - "5601:5601"
+       volumes:
+          - ./kibana/config/:/usr/share/kibana/config:ro
+       environment:
+          - "ELASTICSEARCH_URL=http://elasticsearch:9200"
+          - "ELASTICSEARCH_USERNAME='iodine'"
+          - "ELASTICSEARCH_PASSWORD='password'"
+       networks:
+          - docker-efk
+       depends_on:
+          - elasticsearch
+
+networks:
+  docker-efk:
+    driver: bridge
